@@ -1,0 +1,351 @@
+CREAR VISTAS
+
+Vista de todos los aspirantes que se han postulado para un programa en particular:
+
+CREATE VIEW postulantes_por_programa AS
+SELECT a.identificacion, a.nombre, a.apellido, a.correo, a.telefono, a.genero, p.nombre AS programa
+FROM aspirante a
+JOIN programa p ON a.id_programa = p.id_programa;
+
+_________________
+
+Vista de todos los estudiantes admitidos y sus datos personales:
+
+CREATE VIEW estudiantes_admitidos AS
+SELECT a.identificacion, a.nombre, a.apellido, a.correo, a.telefono, a.genero, e.codigo_estudiante, e.fecha_aceptado
+FROM aspirante a
+JOIN estudiante e ON a.identificacion = e.identificacion_aspirante
+WHERE a.admitido = 1;
+
+_____________________
+
+Vista de todos los grupos de materias con los nombres de las materias y los nombres de los profesores que las imparten:
+
+
+CREATE VIEW grupos_materias_con_profesores AS
+SELECT gm.id_grupo_materia, m.nombre AS materia, p.nombre AS profesor
+FROM grupo_materia gm
+JOIN materia m ON gm.id_materia = m.id_materia
+JOIN profesor p ON m.id_profesor = p.id_profesor;
+
+
+_____________________
+
+Vista de todas las materias y la cantidad de estudiantes inscritos en ellas:
+
+CREATE VIEW materias_con_estudiantes AS
+SELECT m.id_materia, m.nombre, COUNT(DISTINCT em.codigo_estudiante) AS estudiantes_inscritos
+FROM materia m
+LEFT JOIN estudiante_materia em ON m.id_materia = em.id_materia
+GROUP BY m.id_materia;
+
+_____________________
+
+Vista de todos los encargados y sus roles:
+
+CREATE VIEW encargados_con_roles AS
+SELECT e.id_encargado, e.nombre, e.apellido, e.direccion, e.correo, e.telefono, e.edad, e.genero, r.nombre AS rol
+FROM encargado e
+JOIN rol r ON e.id_rol = r.id_rol;
+
+_____________________
+Vista que muestra la información de los estudiantes y las materias que están cursando:
+
+
+CREATE VIEW `estudiantes_materias` AS
+SELECT e.codigo_estudiante, a.nombre, a.apellido, m.nombre AS materia, m.valor_creditos
+FROM estudiante e
+JOIN aspirante a ON e.identificacion_aspirante = a.identificacion
+JOIN estudiante_materia em ON e.codigo_estudiante = em.codigo_estudiante
+JOIN materia m ON em.id_materia = m.id_materia;
+
+___________________
+
+Vista que muestra la información de los grupos de materias y los estudiantes que están inscritos en ellos:
+
+CREATE VIEW `grupos_estudiantes` AS
+SELECT gm.id_grupo_materia, gm.nombre, gm.fecha_inicio, gm.fecha_fin, gm.dias_ver, gm.horas_ver, m.nombre AS materia, e.codigo_estudiante, a.nombre, a.apellido
+FROM grupo_materia gm
+JOIN materia m ON gm.id_materia = m.id_materia
+JOIN estudiante_grupo_materia egm ON gm.id_grupo_materia = egm.id_grupo_materia
+JOIN estudiante e ON egm.codigo_estudiante = e.codigo_estudiante
+JOIN aspirante a ON e.identificacion_aspirante = a.identificacion;
+
+
+___________________
+
+Vista que muestra la cantidad de estudiantes que están inscritos en cada materia:
+
+
+CREATE VIEW `cantidad_estudiantes_materia` AS
+SELECT m.nombre AS materia, COUNT(*) AS cantidad_estudiantes
+FROM estudiante_materia em
+JOIN materia m ON em.id_materia = m.id_materia
+GROUP BY m.id_materia;
+_________________
+
+Vista que muestra la cantidad de estudiantes por género que están inscritos en cada materia:
+
+CREATE VIEW `cantidad_estudiantes_materia_genero` AS
+SELECT m.nombre AS materia, a.genero, COUNT(*) AS cantidad_estudiantes
+FROM estudiante_materia em
+JOIN estudiante e ON em.codigo_estudiante = e.codigo_estudiante
+JOIN aspirante a ON e.identificacion_aspirante = a.identificacion
+JOIN materia m ON em.id_materia = m.id_materia
+GROUP BY m.id_materia, a.genero;
+__________________
+
+Vista que muestra la cantidad de estudiantes por edad que están inscritos en cada materia:
+
+CREATE VIEW `cantidad_estudiantes_materia_edad` AS
+SELECT m.nombre AS materia, e.edad, COUNT(*) AS cantidad_estudiantes
+FROM estudiante_materia em
+JOIN estudiante e ON em.codigo_estudiante = e.codigo_estudiante
+JOIN materia m ON em.id_materia = m.id_materia
+GROUP BY m.id_materia, e.edad;
+
+_________________
+
+
+Vista de los nombres y apellidos de los estudiantes aceptados junto con la fecha en que fueron aceptados.
+
+CREATE VIEW estudiantes_aceptados AS 
+SELECT a.nombre, a.apellido, e.fecha_aceptado 
+FROM aspirante a 
+INNER JOIN estudiante e ON a.identificacion = e.identificacion_aspirante;
+
+_______________
+
+Vista de los estudiantes que pertenecen a un grupo y su horario.
+
+CREATE VIEW estudiantes_grupo_horario AS 
+SELECT e.codigo_estudiante, m.nombre AS materia, gm.nombre AS grupo, gm.dias_ver, gm.horas_ver 
+FROM estudiante e 
+INNER JOIN estudiante_grupo_materia egm ON e.codigo_estudiante = egm.codigo_estudiante 
+INNER JOIN grupo_materia gm ON egm.id_grupo_materia = gm.id_grupo_materia 
+INNER JOIN materia m ON gm.id_materia = m.id_materia;
+
+
+______________
+Vista de los profesores que dictan una materia en particular.
+
+CREATE VIEW profesores_materia AS 
+SELECT p.nombre, p.apellido, m.nombre AS materia 
+FROM profesor p 
+INNER JOIN materia m ON p.id_profesor = m.id_profesor;
+
+______________
+Vista de los nombres de los estudiantes y sus respectivos códigos de grupo y materia.
+
+CREATE VIEW estudiantes_grupo_materia AS 
+SELECT e.codigo_estudiante, gm.nombre AS grupo, m.nombre AS materia 
+FROM estudiante e 
+INNER JOIN estudiante_grupo_materia egm ON e.codigo_estudiante = egm.codigo_estudiante 
+INNER JOIN grupo_materia gm ON egm.id_grupo_materia = gm.id_grupo_materia 
+INNER JOIN materia m ON gm.id_materia = m.id_materia;
+
+_______________
+
+Vista de los estudiantes que no han sido admitidos.
+
+CREATE VIEW aspirantes_no_admitidos AS 
+SELECT nombre, apellido 
+FROM aspirante 
+WHERE admitido = 0;
+
+______________________
+Vista de los nombres y apellidos de los estudiantes junto con su correo electrónico.
+
+CREATE VIEW estudiantes_correo AS 
+SELECT a.nombre, a.apellido, a.correo 
+FROM aspirante a 
+INNER JOIN estudiante e ON a.identificacion = e.identificacion_aspirante;
+
+______________________
+
+Vista de estudiantes por programa: Muestra información de los estudiantes agrupados por programa.
+
+CREATE VIEW estudiantes_por_programa AS 
+SELECT p.nombre AS programa, COUNT(e.codigo_estudiante) AS cantidad_estudiantes
+FROM programa p
+LEFT JOIN materia m ON p.id_programa = m.id_programa
+LEFT JOIN grupo_materia gm ON m.id_materia = gm.id_materia
+LEFT JOIN estudiante_grupo_materia egm ON gm.id_grupo_materia = egm.id_grupo_materia
+LEFT JOIN estudiante e ON egm.codigo_estudiante = e.codigo_estudiante
+GROUP BY p.nombre;
+
+__________________________
+Vista de estudiantes por materia: Muestra información de los estudiantes agrupados por materia.
+
+
+CREATE VIEW estudiantes_por_materia AS 
+SELECT m.nombre AS materia, COUNT(e.codigo_estudiante) AS cantidad_estudiantes
+FROM materia m
+LEFT JOIN estudiante_materia em ON m.id_materia = em.id_materia
+LEFT JOIN estudiante e ON em.codigo_estudiante = e.codigo_estudiante
+GROUP BY m.nombre;
+
+
+____________________________
+
+Vista de estudiantes por grupo y materia: Muestra información de los estudiantes agrupados por grupo y materia.
+
+CREATE VIEW estudiantes_por_grupo_y_materia AS 
+SELECT gm.id_grupo_materia, m.nombre AS materia, COUNT(e.codigo_estudiante) AS cantidad_estudiantes
+FROM materia m
+LEFT JOIN grupo_materia gm ON m.id_materia = gm.id_materia
+LEFT JOIN estudiante_grupo_materia egm ON gm.id_grupo_materia = egm.id_grupo_materia
+LEFT JOIN estudiante e ON egm.codigo_estudiante = e.codigo_estudiante
+GROUP BY gm.id_grupo_materia, m.nombre;
+
+______________________
+Vista de estudiantes por género: Muestra información de los estudiantes agrupados por género.
+
+CREATE VIEW estudiantes_por_genero AS 
+SELECT a.genero, COUNT(e.codigo_estudiante) AS cantidad_estudiantes
+FROM aspirante a
+LEFT JOIN estudiante e ON a.identificacion = e.identificacion_aspirante
+GROUP BY a.genero;
+
+____________________
+
+Vista de estudiantes por edad: Muestra información de los estudiantes agrupados por edad.
+
+CREATE VIEW estudiantes_por_edad AS 
+SELECT 
+  CASE 
+    WHEN edad < 18 THEN 'Menor de edad'
+    WHEN edad BETWEEN 18 AND 25 THEN 'Entre 18 y 25 años'
+    WHEN edad BETWEEN 26 AND 35 THEN 'Entre 26 y 35 años'
+    WHEN edad BETWEEN 36 AND 50 THEN 'Entre 36 y 50 años'
+    ELSE 'Más de 50 años'
+  END AS rango_edad,
+  COUNT(*) AS cantidad_estudiantes
+FROM (
+  SELECT TIMESTAMPDIFF(YEAR, a.fecha_nacimiento, CURDATE()) AS edad, e.codigo_estudiante
+  FROM aspirante a
+  LEFT JOIN estudiante e ON a.identificacion = e.identificacion_aspirante
+) AS t
+GROUP BY rango_edad;
+
+______________________
+Vista de estudiantes, sus materias y grupos de materias:
+
+
+CREATE VIEW `vista_estudiantes_materias_grupos` AS
+SELECT e.codigo_estudiante, a.nombre, a.apellido, m.nombre AS materia, gm.nombre AS grupo
+FROM estudiante e
+JOIN aspirante a ON e.identificacion_aspirante = a.identificacion
+JOIN estudiante_materia em ON e.codigo_estudiante = em.codigo_estudiante
+JOIN materia m ON em.id_materia = m.id_materia
+JOIN grupo_materia gm ON em.id_materia = gm.id_materia AND em.codigo_estudiante IN (
+    SELECT codigo_estudiante FROM estudiante_grupo_materia WHERE id_grupo_materia = gm.id_grupo_materia
+);
+
+_______________________
+Vista de encargados y sus estudiantes:
+
+
+CREATE VIEW `vista_encargados_estudiantes` AS
+SELECT en.id_encargado, en.nombre AS encargado, e.codigo_estudiante, a.nombre AS estudiante
+FROM encargado en
+JOIN estudiante e ON en.id_encargado = (
+    SELECT id_encargado FROM grupo_materia gm
+    JOIN estudiante_grupo_materia egm ON gm.id_grupo_materia = egm.id_grupo_materia
+    WHERE egm.codigo_estudiante = e.codigo_estudiante
+)
+JOIN aspirante a ON e.identificacion_aspirante = a.identificacion;
+
+_______________________________________
+
+Vista que muestra el nombre del estudiante, el nombre de la materia y la nota que obtuvo:
+
+
+CREATE VIEW `vista_estudiante_materia_nota` AS
+SELECT a.nombre, a.apellido, mat.nombre AS materia, em.nota
+FROM aspirante a
+JOIN estudiante e ON a.identificacion = e.identificacion_aspirante
+JOIN estudiante_materia em ON e.codigo_estudiante = em.codigo_estudiante
+JOIN materia mat ON em.id_materia = mat.id_materia;
+
+______________________________________
+Vista combinada de grupos de materias con sus respectivas materias:
+
+
+CREATE VIEW grupo_materias AS
+SELECT gm.id_grupo_materia, m.nombre AS nombre_materia, gm.nombre AS nombre_grupo_materia, gm.fecha_inicio, gm.fecha_fin, gm.dias_ver, gm.horas_ver
+FROM grupo_materia gm
+INNER JOIN materia m ON gm.id_materia = m.id_materia;
+__________________________________
+
+Vista combinada de estudiantes con sus respectivos grupos de materias:
+
+
+CREATE VIEW estudiante_grupo_materias AS
+SELECT e.codigo_estudiante, a.nombre AS nombre_estudiante, a.apellido AS apellido_estudiante, gm.nombre AS nombre_grupo_materia
+FROM estudiante e
+INNER JOIN aspirante a ON e.identificacion_aspirante = a.identificacion
+INNER JOIN estudiante_grupo_materia egm ON e.codigo_estudiante = egm.codigo_estudiante
+INNER JOIN grupo_materia gm ON egm.id_grupo_materia = gm.id_grupo_materia;
+__________________________________
+
+Vista combinada de información de aspirantes y sus programas:
+
+CREATE VIEW aspirante_programa AS
+SELECT a.identificacion, a.nombre, a.apellido, p.nombre AS programa, a.admitido
+FROM aspirante a
+JOIN programa p ON a.id_programa = p.id_programa;
+______________________________
+
+Vista combinada de información de grupos de materias y sus profesores:
+
+
+CREATE VIEW grupo_materia_profesor AS
+SELECT gm.id_grupo_materia, gm.nombre AS grupo, p.nombre AS profesor
+FROM grupo_materia gm
+JOIN materia m ON gm.id_materia = m.id_materia
+JOIN profesor p ON m.id_profesor = p.id_profesor;
+
+______________________
+
+Vista combinada de información de programas y sus materias:
+
+
+CREATE VIEW programa_materia AS
+SELECT p.nombre AS programa, m.nombre AS materia
+FROM programa p
+JOIN materia m ON p.id_programa = m.id_programa;
+_______________________
+
+Vista que muestre el nombre completo del estudiante, su correo, su teléfono y el nombre del programa en el que está matriculado:
+
+CREATE VIEW estudiante_programa_view AS
+SELECT CONCAT(a.nombre, ' ', a.apellido) AS nombre_completo, a.correo, a.telefono, p.nombre AS programa
+FROM aspirante a
+JOIN estudiante e ON a.identificacion = e.identificacion_aspirante
+JOIN programa p ON a.id_programa = p.id_programa;
+
+
+________________________
+
+Vista que muestre el nombre completo del estudiante, su correo, su teléfono y el nombre de la materia que está cursando:
+
+
+CREATE VIEW estudiante_materia_view AS
+SELECT CONCAT(a.nombre, ' ', a.apellido) AS nombre_completo, a.correo, a.telefono, m.nombre AS materia
+FROM aspirante a
+JOIN estudiante e ON a.identificacion = e.identificacion_aspirante
+JOIN estudiante_materia em ON e.codigo_estudiante = em.codigo_estudiante
+JOIN materia m ON em.id_materia = m.id_materia;
+
+__________________________
+Vista que muestre el nombre del estudiante, el nombre de la materia y el nombre del profesor encargado:
+
+
+CREATE VIEW estudiante_materia_profesor_view AS
+SELECT CONCAT(a.nombre, ' ', a.apellido) AS nombre_estudiante, m.nombre AS materia, CONCAT(p.nombre, ' ', p.apellido) AS nombre_profesor
+FROM aspirante a
+JOIN estudiante e ON a.identificacion = e.identificacion_aspirante
+JOIN estudiante_materia em ON e.codigo_estudiante = em.codigo_estudiante
+JOIN materia m ON em.id_materia = m.id_materia
+JOIN profesor p ON m.id_profesor = p.id_profesor;
